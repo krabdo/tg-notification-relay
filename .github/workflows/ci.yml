@@ -1,0 +1,26 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - run: test -z "$(gofmt -l *.go)"
+      - run: go vet ./...
+      - run: go test -race ./...
+      - name: Simulated resource profile
+        run: go test -run '^TestResourceProfile$' -v -count=1 ./... | tee resource-profile.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: simulated-resource-profile
+          path: resource-profile.txt

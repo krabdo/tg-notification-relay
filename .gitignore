@@ -1,0 +1,9 @@
+py/
+.env
+*.session*
+state.json
+data/
+bin/
+*.exe
+*.test
+coverage.out

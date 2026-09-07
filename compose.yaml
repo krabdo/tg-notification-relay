@@ -1,0 +1,18 @@
+services:
+  relay:
+    image: ghcr.io/krabdo/tg-notification-relay:v0.1.0
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      TG_SESSION: /data/telegram.session.json
+      STATE_FILE: /data/state.json
+    volumes:
+      - relay-data:/data
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    stop_grace_period: 15s
+volumes:
+  relay-data:
