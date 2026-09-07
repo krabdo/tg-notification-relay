@@ -203,6 +203,11 @@ func (r *relay) process(ctx context.Context, raw *tg.Message) {
 		}
 	}
 	m := message{ID: raw.ID, ChatID: p.id, SenderID: sender.id, Private: p.kind == 'u', Out: raw.Out, Mentioned: raw.Mentioned, Text: raw.Message}
+	// A Telegram notification destination may be this same account. Suppress the
+	// relay's own summary echoed by a configured notification bot, not other bot messages.
+	if sender.kind == 'u' && r.notify.botIDs[sender.id] && strings.HasPrefix(m.Text, "Telegram｜") && strings.HasSuffix(m.Text, "tg://") {
+		return
+	}
 	if command := savedCommand(m, r.me); command != "" {
 		r.command(ctx, command)
 		return

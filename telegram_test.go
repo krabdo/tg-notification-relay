@@ -104,3 +104,13 @@ func TestChannelUpdatesAndNamespace(t *testing.T) {
 		t.Fatal("peer namespaces collided")
 	}
 }
+
+func TestTelegramDestinationDoesNotLoop(t *testing.T) {
+	r, _ := testRelay(t)
+	r.notify.botIDs = map[int64]bool{8: true}
+	r.Handle(context.Background(), &tg.UpdateShortMessage{ID: 1, UserID: 8, Message: "Telegram｜私聊\nAlice: 点击查看\ntg://"})
+	r.Handle(context.Background(), &tg.UpdateShortMessage{ID: 2, UserID: 8, Message: "regular bot message"})
+	if len(r.notify.targets[0].queue) != 1 {
+		t.Fatal("notification loop or ordinary bot message suppressed")
+	}
+}

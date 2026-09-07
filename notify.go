@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -35,6 +36,7 @@ type notifier struct {
 	state               *pushState
 	timeout, retryDelay time.Duration
 	wg                  sync.WaitGroup
+	botIDs              map[int64]bool
 }
 
 func services() []string {
@@ -47,7 +49,7 @@ func services() []string {
 func newNotifier(urls []string, state *pushState) (*notifier, error) {
 	// Some Shoutrrr services use the default HTTP client. Configure it before workers start.
 	http.DefaultClient.Timeout = 10 * time.Second
-	n := &notifier{state: state, timeout: 10 * time.Second, retryDelay: 2 * time.Second}
+	n := &notifier{state: state, timeout: 10 * time.Second, retryDelay: 2 * time.Second, botIDs: make(map[int64]bool)}
 	r, _ := router.New(nil)
 	transport := newBarkTransport(http.DefaultTransport)
 	for i, raw := range urls {
@@ -57,6 +59,11 @@ func newNotifier(urls []string, state *pushState) (*notifier, error) {
 		}
 		parsed, _ := url.Parse(raw)
 		scheme := strings.ToLower(parsed.Scheme)
+		if scheme == "telegram" && parsed.User != nil {
+			if id, err := strconv.ParseInt(parsed.User.Username(), 10, 64); err == nil {
+				n.botIDs[id] = true
+			}
+		}
 		if scheme == "logger" {
 			service.SetLogger(log.New(os.Stdout, "", log.LstdFlags))
 		}

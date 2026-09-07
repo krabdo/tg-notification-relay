@@ -30,6 +30,7 @@ jobs:
             docker buildx build --platform linux/$arch --build-arg VERSION="$VERSION" --load -t relay-test:$arch .
             test "$(docker run --rm --platform linux/$arch relay-test:$arch version)" = "$VERSION"
             docker run --rm --platform linux/$arch relay-test:$arch services | grep -q '^bark$'
+            docker run --rm --platform linux/$arch --read-only --mount type=volume,destination=/data --entrypoint sh relay-test:$arch -c 'test "$(id -u)" = 10001 && touch /data/.write-test'
           done
       - uses: docker/build-push-action@v6
         id: publish
