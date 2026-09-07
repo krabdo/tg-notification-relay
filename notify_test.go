@@ -127,10 +127,11 @@ func TestShoutrrrBarkLocal(t *testing.T) {
 		t.Fatal(err)
 	}
 	startTestNotifier(t, n)
-	n.enqueue("Telegram｜私聊", "Alice: 点击查看")
+	body := notificationBody(message{Private: true, SenderName: "Alice", Text: strings.Repeat("中", 50) + "截断部分"})
+	n.enqueue("Telegram｜私聊", body)
 	select {
 	case p := <-received:
-		if p["title"] != "Telegram｜私聊" || p["body"] != "Alice: 点击查看" || p["url"] != "tg://" || p["group"] != "Telegram" {
+		if p["title"] != "Telegram｜私聊" || p["body"] != "Alice: "+strings.Repeat("中", 50) || p["url"] != "tg://" || p["group"] != "Telegram" {
 			t.Fatal(p)
 		}
 	case <-time.After(3 * time.Second):

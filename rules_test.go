@@ -42,9 +42,28 @@ func TestRules(t *testing.T) {
 	if usernameMention("@any", "") {
 		t.Fatal("empty username matched")
 	}
-	m := message{Text: "SECRET BODY", SenderName: "Alice", ChatName: "Group"}
-	if got := notificationBody(m); got != "Group\nAlice: 点击查看" || strings.Contains(got, m.Text) {
+	m := message{Text: "消息正文", SenderName: "Alice", ChatName: "Group"}
+	if got := notificationBody(m); got != "Group\nAlice: 消息正文" {
 		t.Fatal(got)
+	}
+}
+
+func TestMessagePreview(t *testing.T) {
+	for _, tc := range []struct{ name, input, want string }{
+		{"short", "你好 Telegram", "你好 Telegram"},
+		{"exactly 50", strings.Repeat("中", 50), strings.Repeat("中", 50)},
+		{"over 50", strings.Repeat("中", 50) + "不应出现", strings.Repeat("中", 50)},
+		{"emoji boundary", strings.Repeat("中", 49) + "😀尾巴", strings.Repeat("中", 49) + "😀"},
+		{"ascii", strings.Repeat("a", 51), strings.Repeat("a", 50)},
+		{"newline", "第一行\n第二行", "第一行\n第二行"},
+		{"no caption", "", "点击查看"},
+		{"blank", " \n\t", "点击查看"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := messagePreview(tc.input); got != tc.want {
+				t.Fatalf("got %q want %q", got, tc.want)
+			}
+		})
 	}
 }
 

@@ -1,6 +1,6 @@
 services:
   relay:
-    image: ghcr.io/krabdo/tg-notification-relay:v0.1.0
+    image: ghcr.io/krabdo/tg-notification-relay:v0.1.1
     restart: unless-stopped
     env_file: .env
     environment:

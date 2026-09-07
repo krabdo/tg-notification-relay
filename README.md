@@ -7,7 +7,7 @@
 - 私聊、群组中被 @、匹配 `MY_USERNAME` 的提及、回复自己的消息触发通知。
 - 默认忽略自己发出的消息、普通群消息及无关频道消息。
 - 使用 Telegram 通知渠道时，忽略该通知 bot 回送的本程序摘要，防止循环转发；其他 bot 消息仍按正常规则处理。
-- 通知只包含姓名、群名和“点击查看”，不会转发消息正文或媒体。
+- 通知包含姓名、群名和消息正文的前 50 个 Unicode 字符；超过部分直接截断，不追加省略号。媒体消息使用其文字说明，没有正文时显示“点击查看”，不转发媒体文件。
 - Bark 通知可直接打开 Telegram；其他渠道收到文本形式的 `tg://`，是否可点击由接收端决定。
 - 在自己的收藏夹 / Saved Messages 发送 `/on`、`/off`、`/status`、`/help` 控制通知，开关重启后保留。其他聊天中的命令无效。
 
@@ -31,7 +31,7 @@ docker compose logs -f --tail=100
 手动拉取镜像：
 
 ```sh
-docker pull ghcr.io/krabdo/tg-notification-relay:v0.1.0
+docker pull ghcr.io/krabdo/tg-notification-relay:v0.1.1
 ```
 
 更新时修改 Compose 中的版本，然后运行 `docker compose pull && docker compose up -d`。保留数据卷，无需重新登录。会话失效时先 `docker compose down`，再运行 `login` 并启动服务。不要删除持久卷来执行普通更新。

@@ -61,7 +61,7 @@ func notificationBody(m message) string {
 	if name == "" {
 		name = "未知"
 	}
-	body := name + ": 点击查看"
+	body := name + ": " + messagePreview(m.Text)
 	if !m.Private {
 		chat := m.ChatName
 		if chat == "" {
@@ -70,4 +70,20 @@ func notificationBody(m message) string {
 		body = chat + "\n" + body
 	}
 	return body
+}
+
+// Count Unicode code points rather than bytes, so Chinese text and emoji are
+// not cut in the middle of a UTF-8 encoding. Do not append beyond the 50 limit.
+func messagePreview(text string) string {
+	if strings.TrimSpace(text) == "" {
+		return "点击查看"
+	}
+	count := 0
+	for offset := range text {
+		if count == 50 {
+			return text[:offset]
+		}
+		count++
+	}
+	return text
 }

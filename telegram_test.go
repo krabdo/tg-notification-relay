@@ -53,12 +53,12 @@ func TestTelegramShortUpdatesAndDedup(t *testing.T) {
 		t.Fatal("duplicate notification")
 	}
 	got := <-r.notify.targets[0].queue
-	if got.Body != "Alice: 点击查看" {
+	if got.Body != "Alice: PRIVATE_SECRET" {
 		t.Fatal(got)
 	}
 	r.Handle(ctx, &tg.UpdateShortChatMessage{ID: 2, ChatID: 9, FromID: 8, Message: "hi @ALICE!"})
 	got = <-r.notify.targets[0].queue
-	if got.Title != "Telegram｜用户名@" || got.Body != "Group\nAlice: 点击查看" {
+	if got.Title != "Telegram｜用户名@" || got.Body != "Group\nAlice: hi @ALICE!" {
 		t.Fatal(got)
 	}
 }
